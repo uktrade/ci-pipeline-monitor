@@ -21,7 +21,7 @@ def status():
         consul_status.close()
         totaltime += consul_status.elapsed
         if consul_status.status_code != 200:
-            raise ApiError('GET /v1/status/leader {}'.format(consul_status.status_code))
+            consul_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
@@ -32,7 +32,7 @@ def status():
         vault_status.close()
         totaltime += vault_status.elapsed
         if vault_status.status_code != 200:
-            raise ApiError('GET /v1/sys/health {}'.format(vault_status.status_code))
+            vault_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
@@ -43,7 +43,7 @@ def status():
         jenksin_status.close()
         totaltime += jenksin_status.elapsed
         if jenksin_status.status_code != 200:
-            raise ApiError('GET / {}'.format(jenksin_status.status_code))
+            jenksin_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
