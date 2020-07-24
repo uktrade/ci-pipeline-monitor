@@ -10,6 +10,8 @@ env = environ.Env()
 application.config["CONSUL_API"] = env('CONSUL_API', default='http://consul:8500/')
 application.config["VAULT_API"] = env('VAULT_API', default='http://vault:8200/')
 application.config["JENKINS_URL"] = env('JENKINS_URL', default='http://jenkins:8080/')
+application.config["POWERDNS_URL"] = env('JENKINS_URL', default='http://powerdns/')
+application.config["POWERDNS_API_KEY"] = env('POWERDNS_API_KEY', default='')
 
 @application.route("/")
 def status():
@@ -44,6 +46,19 @@ def status():
         totaltime += jenksin_status.elapsed
         if jenksin_status.status_code != 200:
             jenksin_status.raise_for_status()
+            service_degraded += 1
+    except requests.exceptions.RequestException as e:
+        print(e)
+        service_degraded += 1
+
+    try:
+        powerdns_headers = {'X-API-Key': application.config["POWERDNS_API_KEY"]}
+        powerdns_status = requests.get(application.config["POWERDNS_URL"] + '/api/v1/servers/localhost/zones', headers=powerdns_headers)
+        powerdns_status.close()
+        powerdns_status_json = json.loads(powerdns_status.content)
+        totaltime += powerdns_status.elapsed
+        if powerdns_status.status_code != 200 and len(powerdns_status_json) > 0:
+            powerdns_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
