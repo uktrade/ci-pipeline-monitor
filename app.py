@@ -10,7 +10,7 @@ env = environ.Env()
 application.config["CONSUL_API"] = env('CONSUL_API', default='http://consul:8500/')
 application.config["VAULT_API"] = env('VAULT_API', default='http://vault:8200/')
 application.config["JENKINS_URL"] = env('JENKINS_URL', default='http://jenkins:8080/')
-application.config["POWERDNS_URL"] = env('JENKINS_URL', default='http://powerdns/')
+application.config["POWERDNS_URL"] = env('POWERDNS_URL', default='http://powerdns/')
 application.config["POWERDNS_API_KEY"] = env('POWERDNS_API_KEY', default='')
 
 @application.route("/")
