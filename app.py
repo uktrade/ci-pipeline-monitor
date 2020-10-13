@@ -12,6 +12,7 @@ application.config["VAULT_API"] = env('VAULT_API', default='http://vault:8200/')
 application.config["JENKINS_URL"] = env('JENKINS_URL', default='http://jenkins:8080/')
 application.config["POWERDNS_URL"] = env('POWERDNS_URL', default='http://powerdns/')
 application.config["POWERDNS_API_KEY"] = env('POWERDNS_API_KEY', default='')
+application.config["PROXY_ADDR"] = env('PROXY_ADDR', default='proxy')
 
 @application.route("/")
 def status():
@@ -59,6 +60,18 @@ def status():
         totaltime += powerdns_status.elapsed
         if powerdns_status.status_code != 200 and len(powerdns_status_json) > 0:
             powerdns_status.raise_for_status()
+            service_degraded += 1
+    except requests.exceptions.RequestException as e:
+        print(e)
+        service_degraded += 1
+
+    try:
+        proxy = { 'http': 'http://' + application.config["PROXY_ADDR"] + ':80', 'https': 'https://' + application.config["PROXY_ADDR"] + ':443' }
+        proxy_status = requests.get('http://trade.gov.uk/', proxies=proxy, allow_redirects=False)
+        proxy_status.close()
+        totaltime += proxy_status.elapsed
+        if proxy_status.status_code >= 399 or proxy_status.elapsed.total_seconds() > 5:
+            proxy_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
