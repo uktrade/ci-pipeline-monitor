@@ -19,16 +19,19 @@ application.config["GITLAB_URL"] = env('GITLAB_URL', default='https://gitlab-/li
 def status():
     service_degraded = 0
     totaltime = timedelta()
+    error_msg = ''
 
     try:
         consul_status = requests.get(application.config["CONSUL_API"] + '/v1/status/leader')
         consul_status.close()
         totaltime += consul_status.elapsed
         if consul_status.status_code != 200:
+            error_msg = error_msg + '<error>consul: ' + consul_status.status_code + '</error>'
             consul_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
+        error_msg = error_msg + e
         service_degraded += 1
 
     try:
@@ -36,10 +39,12 @@ def status():
         vault_status.close()
         totaltime += vault_status.elapsed
         if vault_status.status_code != 200:
+            error_msg = error_msg + '<error>vault: ' + vault_status.status_code + '</error>'
             vault_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
+        error_msg = error_msg + e
         service_degraded += 1
 
     try:
@@ -47,10 +52,12 @@ def status():
         jenksin_status.close()
         totaltime += jenksin_status.elapsed
         if jenksin_status.status_code != 200:
+            error_msg = error_msg + '<error>jenkins: ' + jenkins_status.status_code + '</error>'
             jenksin_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
+        error_msg = error_msg + e
         service_degraded += 1
 
     try:
@@ -60,10 +67,12 @@ def status():
         powerdns_status_json = json.loads(powerdns_status.content)
         totaltime += powerdns_status.elapsed
         if powerdns_status.status_code != 200 or len(powerdns_status_json) < 1:
+            error_msg = error_msg + '<error>powerdns: ' + powerdns_status.status_code + '</error>'
             powerdns_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
+        error_msg = error_msg + e
         service_degraded += 1
 
     try:
@@ -72,10 +81,12 @@ def status():
         proxy_status.close()
         totaltime += proxy_status.elapsed
         if proxy_status.status_code >= 399 or proxy_status.elapsed.total_seconds() > 5:
+            error_msg = error_msg + '<error>proxy: ' + proxy_status.status_code + '</error>'
             proxy_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
+        error_msg = error_msg + e
         service_degraded += 1
 
     try:
@@ -84,19 +95,21 @@ def status():
         totaltime += gitlab_status.elapsed
         gitlab_status_json = json.loads(gitlab_status.content)
         if gitlab_status.status_code != 200 or gitlab_status_json['status'] != 'ok':
+            error_msg = error_msg + '<error>gitlab: ' + consul_status.status_code + '</error>'
             gitlab_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
+        error_msg = error_msg + e
         service_degraded += 1
 
 
     if service_degraded == 0:
         return('<pingdom_http_custom_check><status>OK</status><response_time>' + str(totaltime.total_seconds()) + '</response_time></pingdom_http_custom_check>')
     elif service_degraded == 3:
-        return('<pingdom_http_custom_check><status>DOWN</status><response_time>' + str(totaltime.total_seconds()) + '</response_time></pingdom_http_custom_check>')
+        return('<pingdom_http_custom_check><status>DOWN</status><response_time>' + str(totaltime.total_seconds()) + '</response_time></pingdom_http_custom_check>' + error_msg)
     elif service_degraded < 3:
-        return('<pingdom_http_custom_check><status>DEGRADED</status><response_time>' + str(totaltime.total_seconds()) + '</response_time></pingdom_http_custom_check>')
+        return('<pingdom_http_custom_check><status>DEGRADED</status><response_time>' + str(totaltime.total_seconds()) + '</response_time></pingdom_http_custom_check>' + error_msg)
 
 
 if __name__ == "__main__":
