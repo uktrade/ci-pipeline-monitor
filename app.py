@@ -48,12 +48,12 @@ def status():
         service_degraded += 1
 
     try:
-        jenksin_status = requests.get(application.config["JENKINS_URL"])
-        jenksin_status.close()
-        totaltime += jenksin_status.elapsed
-        if jenksin_status.status_code != 200:
+        jenkins_status = requests.get(application.config["JENKINS_URL"])
+        jenkins_status.close()
+        totaltime += jenkins_status.elapsed
+        if jenkins_status.status_code != 200:
             error_msg = error_msg + '<error>jenkins: ' + jenkins_status.status_code + '</error>'
-            jenksin_status.raise_for_status()
+            jenkins_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
