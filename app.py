@@ -59,7 +59,7 @@ def status():
         powerdns_status.close()
         powerdns_status_json = json.loads(powerdns_status.content)
         totaltime += powerdns_status.elapsed
-        if powerdns_status.status_code != 200 and len(powerdns_status_json) > 0:
+        if powerdns_status.status_code != 200 or len(powerdns_status_json) < 1:
             powerdns_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
