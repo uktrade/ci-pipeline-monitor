@@ -5,15 +5,15 @@ import json
 from datetime import timedelta
 
 application = Flask(__name__)
-
 env = environ.Env()
+
 application.config["CONSUL_API"] = env('CONSUL_API', default='http://consul:8500/')
 application.config["VAULT_API"] = env('VAULT_API', default='http://vault:8200/')
 application.config["JENKINS_URL"] = env('JENKINS_URL', default='http://jenkins:8080/')
 application.config["POWERDNS_URL"] = env('POWERDNS_URL', default='http://powerdns/')
 application.config["POWERDNS_API_KEY"] = env('POWERDNS_API_KEY', default='')
 application.config["PROXY_ADDR"] = env('PROXY_ADDR', default='proxy')
-application.config["GITLAB_URL"] = env('GITLAB_URL', default='https://gitlab-/liveness')
+application.config["GITLAB_URL"] = env('GITLAB_URL', default='https://gitlab/-/liveness')
 
 @application.route("/")
 def status():
