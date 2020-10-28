@@ -27,7 +27,6 @@ def status():
         totaltime += consul_status.elapsed
         if consul_status.status_code != 200:
             error_msg = error_msg + '<error>consul: ' + str(consul_status.status_code) + '</error>'
-            consul_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
@@ -40,7 +39,6 @@ def status():
         totaltime += vault_status.elapsed
         if vault_status.status_code != 200:
             error_msg = error_msg + '<error>vault: ' + str(vault_status.status_code) + '</error>'
-            vault_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
@@ -53,7 +51,6 @@ def status():
         totaltime += jenkins_status.elapsed
         if jenkins_status.status_code != 200:
             error_msg = error_msg + '<error>jenkins: ' + str(jenkins_status.status_code) + '</error>'
-            jenkins_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
@@ -68,7 +65,6 @@ def status():
         totaltime += powerdns_status.elapsed
         if powerdns_status.status_code != 200 or len(powerdns_status_json) < 1:
             error_msg = error_msg + '<error>powerdns: ' + str(powerdns_status.status_code) + '</error>'
-            powerdns_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
@@ -82,7 +78,6 @@ def status():
         totaltime += proxy_status.elapsed
         if proxy_status.status_code >= 399 or proxy_status.elapsed.total_seconds() > 5:
             error_msg = error_msg + '<error>proxy: ' + str(proxy_status.status_code) + '</error>'
-            proxy_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
@@ -96,7 +91,6 @@ def status():
         gitlab_status_json = json.loads(gitlab_status.content)
         if gitlab_status.status_code != 200 or gitlab_status_json['status'] != 'ok':
             error_msg = error_msg + '<error>gitlab: ' + str(gitlab_status.status_code) + '</error>'
-            gitlab_status.raise_for_status()
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
