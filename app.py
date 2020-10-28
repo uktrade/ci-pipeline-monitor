@@ -13,6 +13,7 @@ application.config["JENKINS_URL"] = env('JENKINS_URL', default='http://jenkins:8
 application.config["POWERDNS_URL"] = env('POWERDNS_URL', default='http://powerdns/')
 application.config["POWERDNS_API_KEY"] = env('POWERDNS_API_KEY', default='')
 application.config["PROXY_ADDR"] = env('PROXY_ADDR', default='proxy')
+application.config["GITLAB_URL"] = env('GITLAB_URL', default='https://gitlab-/liveness')
 
 @application.route("/")
 def status():
@@ -76,6 +77,19 @@ def status():
     except requests.exceptions.RequestException as e:
         print(e)
         service_degraded += 1
+
+    try:
+        gitlab_status = requests.get(application.config["GITLAB_URL"])
+        gitlab_status.close()
+        totaltime += gitlab_status.elapsed
+        gitlab_status_json = json.loads(gitlab_status.content)
+        if gitlab_status.status_code != 200 or gitlab_status_json['status'] != 'ok':
+            gitlab_status.raise_for_status()
+            service_degraded += 1
+    except requests.exceptions.RequestException as e:
+        print(e)
+        service_degraded += 1
+
 
     if service_degraded == 0:
         return('<pingdom_http_custom_check><status>OK</status><response_time>' + str(totaltime.total_seconds()) + '</response_time></pingdom_http_custom_check>')
