@@ -14,6 +14,8 @@ application.config["POWERDNS_URL"] = env('POWERDNS_URL', default='http://powerdn
 application.config["POWERDNS_API_KEY"] = env('POWERDNS_API_KEY', default='')
 application.config["PROXY_ADDR"] = env('PROXY_ADDR', default='proxy')
 application.config["GITLAB_URL"] = env('GITLAB_URL', default='https://gitlab/-/liveness')
+application.config["SENTRY_URL"] = env('SENTRY_URL', default='https://sentry/')
+application.config["SENTRY_EXTERNAL_URL"] = env('SENTRY_EXTERNAL_URL', default='https://raven/')
 
 @application.route("/")
 def status():
@@ -91,6 +93,30 @@ def status():
         gitlab_status_json = json.loads(gitlab_status.content)
         if gitlab_status.status_code != 200 or gitlab_status_json['status'] != 'ok':
             error_msg = error_msg + '<error>gitlab: ' + str(gitlab_status.status_code) + '</error>'
+            service_degraded += 1
+    except requests.exceptions.RequestException as e:
+        print(e)
+        error_msg = error_msg + e
+        service_degraded += 1
+
+    try:
+        sentry_status = requests.get(application.config["SENTRY_URL"])
+        sentry_status.close()
+        totaltime += sentry_status.elapsed
+        if sentry_status.status_code >= 399 or sentry_status.elapsed.total_seconds() > 5:
+            error_msg = error_msg + '<error>sentry: ' + str(sentry_status.status_code) + '</error>'
+            service_degraded += 1
+    except requests.exceptions.RequestException as e:
+        print(e)
+        error_msg = error_msg + e
+        service_degraded += 1
+
+    try:
+        raven_status = requests.get(application.config["SENTRY_EXTERNAL_URL"])
+        raven_status.close()
+        totaltime += raven_status.elapsed
+        if raven_status.status_code >= 499 or raven_status.elapsed.total_seconds() > 5:
+            error_msg = error_msg + '<error>sentry external: ' + str(raven_status.status_code) + '</error>'
             service_degraded += 1
     except requests.exceptions.RequestException as e:
         print(e)
