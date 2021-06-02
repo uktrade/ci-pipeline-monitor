@@ -1,5 +1,6 @@
 flask
 django-environ
-requests
+requests==2.25.0
 gunicorn
 jinja2==2.11.3
+urllib3==1.26.5

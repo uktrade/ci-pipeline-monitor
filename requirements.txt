@@ -26,10 +26,12 @@ jinja2==2.11.3
     #   flask
 markupsafe==1.1.1
     # via jinja2
-requests==2.22.0
+requests==2.25.0
     # via -r requirements.in
-urllib3==1.25.6
-    # via requests
+urllib3==1.26.5
+    # via
+    #   -r requirements.in
+    #   requests
 werkzeug==0.16.0
     # via flask
 
