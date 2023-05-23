@@ -28,7 +28,7 @@ markupsafe==2.1.2
     # via
     #   jinja2
     #   werkzeug
-requests==2.28.2
+requests==2.31.0
     # via -r requirements.in
 urllib3==1.26.14
     # via
