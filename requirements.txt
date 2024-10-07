@@ -30,7 +30,7 @@ markupsafe==2.1.5
     #   werkzeug
 packaging==24.0
     # via gunicorn
-requests==2.31.0
+requests==2.32.2
     # via -r requirements.in
 urllib3==2.2.1
     # via
